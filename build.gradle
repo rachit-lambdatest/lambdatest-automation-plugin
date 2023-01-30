@@ -30,7 +30,7 @@ plugins {
 
 group = 'org.jenkins-ci.plugins'
 
-version = '1.20.0'
+version = '1.20.1'
 
 description = 'LambdaTest Plugin is used to run automated selenium tests on LambdaTest Cloud'
 
@@ -108,7 +108,11 @@ dependencies {
 
     // This dependency is used internally, and not exposed to consumers on their own compile classpath.
     implementation 'com.google.guava:guava:23.0'
-	
+    implementation 'org.antlr:antlr4:4.2'
+
+    jenkinsPlugins 'org.jenkins-ci.plugins.workflow:workflow-step-api:639.v6eca_cd8c04a_a_'
+    
+
 	jenkinsPlugins 'org.jenkins-ci.plugins:matrix-project:1.4'
     jenkinsPlugins 'org.jenkinsci.plugins:git:1.1.25'
     jenkinsPlugins 'org.jenkins-ci.plugins:credentials:2.1.10'
