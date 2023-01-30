@@ -192,6 +192,10 @@ public class ReportBuildAction extends AbstractReportBuildAction {
                                 } else {
                                     resultJSON.put("OS",sessionDetailNode.get("platform").toString().replaceAll("\"", ""));
                                 }
+                                if(sessionDetailNode.has("device"))
+                                {
+                                resultJSON.put("browser",sessionDetailNode.get("device").toString().replaceAll("\"", ""));
+                                }
                                 resultJSON.put("testDuration",sessionDetailNode.get("duration").toString().replaceAll("\"", ""));
                                
                                 resultJSON.put("testId",sessionDetailNode.get("test_id").toString().replaceAll("\"", ""));
