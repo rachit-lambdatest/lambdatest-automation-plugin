@@ -54,31 +54,20 @@ public class LambdaTestReportStepExecution extends SynchronousNonBlockingStepExe
         
         final EnvVars parentEnvs = run.getEnvironment(taskListener);
         
-
-       
         String buildName = parentContextEnvVars.get(Constant.LT_BUILD_NAME);
         
         final String username = parentContextEnvVars.get(Constant.LT_USERNAME);
         final String accessKey = parentContextEnvVars.get(Constant.LT_ACCESS_KEY);
 
-       
-       
         logger.info("username : " + username);
-        logger.info("accessKey : " + accessKey);
         logger.info("buildName : " + buildName);
         
-       
-
         final ReportBuildAction ltReportAction =
                 new ReportBuildAction(run, username ,accessKey, buildName, product);
         
         ltReportAction.generateLambdaTestReport();
         
         run.addAction(ltReportAction);
-        // build.addAction(ltReportAction);
-
-
-
         return null;
 
     }

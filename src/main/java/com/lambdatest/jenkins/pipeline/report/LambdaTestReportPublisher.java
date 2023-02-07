@@ -43,9 +43,7 @@ public class LambdaTestReportPublisher extends Recorder implements SimpleBuildSt
         final String accessKey = parentEnvs.get(Constant.LT_ACCESS_KEY);
         final String buildName = parentEnvs.get(Constant.LT_BUILD_NAME);
 
-    
         logger.info("username : " + username);
-        logger.info("accessKey : " + accessKey);
         logger.info("buildName : " + buildName);
 
         ProjectType product = ProjectType.AUTOMATION;
