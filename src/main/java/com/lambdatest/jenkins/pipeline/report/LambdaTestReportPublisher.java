@@ -24,10 +24,9 @@ import com.lambdatest.jenkins.pipeline.enums.ProjectType;
 
 import com.lambdatest.jenkins.pipeline.Constant;
 
-public class LambdaTestReportPublisher extends Recorder implements SimpleBuildStep {
+public abstract class LambdaTestReportPublisher extends Recorder implements SimpleBuildStep {
     private final static Logger logger = Logger.getLogger(LambdaTestReportPublisher.class.getName());
 
-    @DataBoundConstructor
     public LambdaTestReportPublisher() {
     }
 
