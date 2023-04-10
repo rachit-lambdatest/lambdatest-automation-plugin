@@ -29,19 +29,19 @@ import hudson.util.Secret;
 public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements MagicPlugCredentials {
 
 	private static final long serialVersionUID = 1L;
-	private final String username;
+	private final String userName;
 	private final Secret accessToken;
 
 	@DataBoundConstructor
-	public MagicPlugCredentialsImpl(CredentialsScope scope, String id, String description, String username,
+	public MagicPlugCredentialsImpl(CredentialsScope scope, String id, String description, String userName,
 			String accessToken) throws Exception {
 		super(scope, id, description);
 		try {
 			System.out.println("MagicPlugCredentialsImpl");
-			this.username = username;
+			this.userName = userName;
 			this.accessToken = Secret.fromString(accessToken);
 			System.out.println("Here We can Verify Credentials Also before Adding");
-			if (!CapabilityService.isValidUser(username, accessToken)) {
+			if (!CapabilityService.isValidUser(userName, accessToken)) {
 				throw new Exception("Invalid username and access Token");
 			}
 		} catch (Exception e) {
@@ -80,22 +80,22 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 			return super.getCredentialsPage();
 		}
 
-		public FormValidation doVerifyCredentials(@QueryParameter("username") final String username,
+		public FormValidation doVerifyCredentials(@QueryParameter("userName") final String userName,
 				@QueryParameter("accessToken") final String accessToken) throws IOException, ServletException {
-			System.out.println(username + ":" + accessToken);
-			if (StringUtils.isBlank(username) || StringUtils.isBlank(accessToken)) {
+			System.out.println(userName + ":" + accessToken);
+			if (StringUtils.isBlank(userName) || StringUtils.isBlank(accessToken)) {
 				return FormValidation.error("Please enter valid username and authKey");
 			}
-			if (CapabilityService.isValidUser(username, accessToken)) {
+			if (CapabilityService.isValidUser(userName, accessToken)) {
 				return FormValidation.ok("Successful Authentication");
 			} else {
 				return FormValidation.error("Invalid Credentials");
 			}
 		}
 
-		public FormValidation doCheckUsername(@QueryParameter String username) throws IOException, ServletException {
+		public FormValidation doCheckUsername(@QueryParameter String userName) throws IOException, ServletException {
 			try {
-				if (StringUtils.isBlank(username)) {
+				if (StringUtils.isBlank(userName)) {
 					return FormValidation.error("Invalid username");
 				}
 				return FormValidation.ok();
@@ -120,10 +120,10 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 
 	@Override
 	public String getUserName() {
-		if (this.username == null) {
+		if (userName == null) {
 			return Constant.NOT_AVAILABLE;
 		} else {
-			return this.username;
+			return userName;
 		}
 	}
 
