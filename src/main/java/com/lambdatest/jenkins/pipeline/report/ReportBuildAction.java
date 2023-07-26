@@ -28,7 +28,7 @@ public class ReportBuildAction extends AbstractReportBuildAction {
   private String authString;
   private String buildName;
   private String product;
-  List < JSONObject > result = new ArrayList < JSONObject > ();
+  private transient List < JSONObject > result = new ArrayList < JSONObject > ();
 
   public ReportBuildAction(final Run < ? , ? > build, String name, String password, String buildName, ProjectType product) {
     super();
