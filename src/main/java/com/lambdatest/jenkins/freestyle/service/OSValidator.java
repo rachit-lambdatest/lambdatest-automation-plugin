@@ -1,21 +1,27 @@
 package com.lambdatest.jenkins.freestyle.service;
-
+import java.util.logging.Logger;
 public class OSValidator {
 
 	private static String OS = System.getProperty("os.name").toLowerCase();
+	private static final Logger logger = Logger.getLogger(OSValidator.class.getName());
 
 	public static void main(String[] args) {
-		System.out.println(OS);
+		logger.info(OS);
 		if (isWindows()) {
-			System.out.println("This is Windows");
+			logger.info("This is Windows");
 		} else if (isMac()) {
-			System.out.println("This is Mac");
+			logger.info("This is Mac");
 		} else if (isUnix()) {
-			System.out.println("This is Unix or Linux");
+			logger.info("This is Unix or Linux");
 		} else if (isSolaris()) {
-			System.out.println("This is Solaris");
-		} else {
-			System.out.println("Your OS is not support!!");
+			logger.info("This is Solaris");
+		} else if (isAndroid()) {
+			logger.info("This is Android");
+		} else if (isIOS()) {
+			logger.info("This is iOS");
+		} 
+		else {
+			logger.info("Your OS is not support!!");
 		}
 	}
 
@@ -34,5 +40,13 @@ public class OSValidator {
 	public static boolean isSolaris() {
 		return (OS.indexOf("sunos") >= 0);
 	}
+	public static boolean isAndroid() {
+		return (OS.indexOf("android") >= 0);
+	}
+
+	public static boolean isIOS() {
+		return (OS.indexOf("ios") >= 0);
+	}
+
 
 }

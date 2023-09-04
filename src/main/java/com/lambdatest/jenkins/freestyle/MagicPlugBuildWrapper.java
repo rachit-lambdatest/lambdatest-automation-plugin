@@ -25,6 +25,7 @@ import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.auth.UserAuthResponse;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
+import com.lambdatest.jenkins.freestyle.api.service.AppAutomationCapabilityService;
 import com.lambdatest.jenkins.freestyle.data.LocalTunnel;
 import com.lambdatest.jenkins.freestyle.service.LambdaTunnelService;
 import com.lambdatest.jenkins.freestyle.service.LambdaWebSocketTunnelService;
@@ -43,6 +44,8 @@ import net.sf.json.JSONObject;
 public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable {
 
 	private List<JSONObject> seleniumCapabilityRequest;
+	private List<JSONObject> appAutomationCapabilityRequest;
+	private String appId;
 	private String credentialsId;
 	private String username;
 	private Secret accessToken;
@@ -65,7 +68,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private static final Logger logger = Logger.getLogger(MagicPlugBuildWrapper.class.getName());
 	
 	@DataBoundConstructor
-	public MagicPlugBuildWrapper(StaplerRequest req, @CheckForNull List<JSONObject> seleniumCapabilityRequest,
+	public MagicPlugBuildWrapper(StaplerRequest req, @CheckForNull List<JSONObject> seleniumCapabilityRequest, @CheckForNull List<JSONObject> appAutomationCapabilityRequest,
 			@CheckForNull String credentialsId, String choice, boolean useLocalTunnel, LocalTunnel localTunnel,
 			ItemGroup context) throws Exception {
 		try {
@@ -76,6 +79,13 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			} else {
 				validateTestInput(seleniumCapabilityRequest);
 				this.seleniumCapabilityRequest = seleniumCapabilityRequest;
+			}
+			if (appAutomationCapabilityRequest == null) {
+				// prevent null pointer
+				this.appAutomationCapabilityRequest = new ArrayList<JSONObject>();
+			} else {
+				validateTestInput(appAutomationCapabilityRequest);
+				this.appAutomationCapabilityRequest = appAutomationCapabilityRequest;
 			}
 			// Setting up credentials in both case if input capabilities are there or not
 			this.choice = choice;
@@ -160,8 +170,14 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		}
 
 		// Create Grid URL
-		this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
+		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
+			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		logger.info(this.gridURL);
+		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest)) {
+			logger.info("appAutomationCR : " + appAutomationCapabilityRequest);
+			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getPlainText(),"production");
+		}
+		logger.info("grid URL : " + this.gridURL);
 		return new MagicPlugEnvironment(build);
 	}
 
@@ -207,7 +223,17 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				env.put(Constant.LT_BROWSER_VERSION, seleniumCapability.getString(Constant.BROWSER_VERSION));
 				env.put(Constant.LT_RESOLUTION, seleniumCapability.getString(Constant.RESOLUTION));
 			}
+			if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest)) {
+				JSONObject appAutomationCapability = appAutomationCapabilityRequest.get(0);
+				env.put(Constant.LT_PLATFORM_NAME, appAutomationCapability.getString(Constant.PLATFORM_NAME));
+				env.put(Constant.LT_BRAND_NAME, appAutomationCapability.getString(Constant.BRAND_NAME));
+				env.put(Constant.LT_DEVICE_NAME, appAutomationCapability.getString(Constant.DEVICE_NAME));
+				env.put(Constant.LT_DEVICE_VERSION, appAutomationCapability.getString(Constant.DEVICE_VERSION));
+				env.put(Constant.LT_APP_ID, appAutomationCapability.getString(Constant.APP_ID));
+			}
 			env.put(Constant.LT_BROWSERS, createBrowserJSON(seleniumCapabilityRequest));
+			env.put(Constant.LT_BRANDS, createBrandJSON(appAutomationCapabilityRequest));
+			env.put(Constant.LT_DEVICES, createDeviceJSON(appAutomationCapabilityRequest));
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
@@ -246,6 +272,30 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			}
 			return config;
 		}
+		private String createDeviceJSON(List<JSONObject> appAutomationCapabilityRequests) {
+			String config = Constant.NOT_AVAILABLE;
+			try {
+				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				config = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(appAutomationCapabilityRequests);
+			} catch (JsonProcessingException e) {
+				logger.warning(e.getMessage());
+			}
+			return config;
+		}
+
+		private String createBrandJSON(List<JSONObject> appAutomationCapabilityRequests) {
+			String config = Constant.NOT_AVAILABLE;
+			try {
+				ObjectMapper objectMapper = new ObjectMapper();
+				objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+				config = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(appAutomationCapabilityRequests);
+			} catch (JsonProcessingException e) {
+				logger.warning(e.getMessage());
+			}
+			return config;
+		}
+
 
 		@Override
 		public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
@@ -319,6 +369,21 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 	public void setSeleniumCapabilityRequest(List<JSONObject> seleniumCapabilityRequest) {
 		this.seleniumCapabilityRequest = seleniumCapabilityRequest;
+	}
+	public List<JSONObject> getAppAutomationCapabilityRequest() {
+		return appAutomationCapabilityRequest;
+	}
+
+	public void setAppAutomationCapabilityRequest(List<JSONObject> appAutomationCapabilityRequest) {
+		this.appAutomationCapabilityRequest = appAutomationCapabilityRequest;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppid(String appId) {
+		this.appId = appId;
 	}
 
 	public String getUsername() {

@@ -5,6 +5,7 @@ import jenkins.model.Jenkins;
 public interface Constant {
 
 	String LT_REPORT_DISPLAY_NAME = "LambdaTest Report";
+	String LT_APP_AUTOMATION_REPORT_DISPLAY_NAME = "LambdaTest App Automation Report";
 	String LT_REPORT_URL = "reportLambdaTest";
 	String LT_ICON_FILE_NAME = Jenkins.RESOURCE_PATH + "/plugin/lambdatest-automation/images/logo.png";
 
@@ -20,11 +21,24 @@ public interface Constant {
 	String LT_BUILD_NUMBER = "LT_BUILD_NUMBER";
 	String LT_USERNAME = "LT_USERNAME";
 	String LT_ACCESS_KEY = "LT_ACCESS_KEY";
+	String LT_PLATFORM_NAME = "LT_PLATFORM_NAME";
+	String LT_BRANDS = "LT_BRANDS";
+	String LT_DEVICES = "LT_DEVICES";
+	String LT_BRAND_NAME = "LT_BRAND_NAME";
+	String LT_DEVICE_NAME = "LT_DEVICE_NAME";
+	String LT_DEVICE_VERSION = "LT_DEVICE_VERSION";
+	String LT_APP_ID = "LT_APP_ID";
 
 	String OPERATING_SYSTEM = "operatingSystem";
 	String BROWSER_NAME = "browserName";
 	String BROWSER_VERSION = "browserVersion";
 	String RESOLUTION = "resolution";
+
+	String PLATFORM_NAME = "platformName";
+	String BRAND_NAME = "brandName";
+	String DEVICE_NAME = "deviceName";
+	String DEVICE_VERSION = "deviceVersion";
+	String APP_ID = "appId"; 
 
 	String OS_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array";
 	String BROWSER_API_URL = "https://api.lambdatest.com/api/v1/capability?format=array&os=";
@@ -33,9 +47,15 @@ public interface Constant {
 	String APP_URL = "https://automation.lambdatest.com";
 	String HUB_URL = "@hub.lambdatest.com/wd/hub";
 
+	String APP_AUTOMATION_OS_API_URL = "https://api.lambdatest.com/api/v1/capability?grid=appium";
+	String DEVICE_API_URL = "https://mobile-api.lambdatest.com/mobile-automation/api/v1/capability/generator";
+	String APP_AUTOMATION_APP_URL = "https://appautomation.lambdatest.com";
+	String APP_AUTOMATION_HUB_URL = "@mobile-hub.lambdatest.com/wd/hub";
+
 	interface Stage {
 		String APP_URL = "https://stage-automation.lambdatest.com";
 		String HUB_URL = "@stage-hub.lambdatest.com/wd/hub";
+		String APP_AUTOMATION_HUB_URL = "@stage-mobile-hub.lambdatestinternal.com/wd/hub";
 	}
 
 	interface Beta {
@@ -52,6 +72,12 @@ public interface Constant {
 	String DEFAULT_BROWSER_NAME_VALUE = "Select BrowserName";
 	String DEFAULT_BROWSER_VERSION_VALUE = "Select BrowserVersion";
 	String DEFAULT_RESOLUTION_VALUE = "Select Screen Resolution";
+
+	String DEFAULT_PLATFORM_NAME_VALUE = "Select Platform Name";
+	String DEFAULT_BRAND_NAME_VALUE = "Select Brand Name";
+	String DEFAULT_DEVICE_NAME_VALUE = "Select Device Name";
+	String DEFAULT_DEVICE_VERSION_VALUE = "Select Device Version";
+	String DEFAULT_APP_ID = "Enter App ID";
 
 	String STAGE = "stage";
 	String DEV = "dev";
@@ -110,6 +136,17 @@ public interface Constant {
 		public static final String CREATED_AT = "createdAt";
 		public static final String BUILD_INFO_URL = "https://api.lambdatest.com/automation/api/v1/builds";
 		public static final String SESSION_INFO_URL = "https://api.lambdatest.com/automation/api/v1/sessions";
+	}
+	interface AppAutomationReport {
+		public static final String NAME = "name";
+		public static final String DEVICE = "device";
+		public static final String OS = "os";
+		public static final String STATUS = "status";
+		public static final String USER_MARKED = "userMarked";
+		public static final String DURATION = "duration";
+		public static final String CREATED_AT = "createdAt";
+		public static final String BUILD_INFO_URL = "https://mobile-api.lambdatest.com/mobile-automation/api/v1/builds";
+		public static final String SESSION_INFO_URL = "https://mobile-api.lambdatest.com/mobile-automation/api/v1/sessions";
 	}
 
 }
