@@ -35,10 +35,8 @@ public class AppAutomationReportBuildAction extends AbstractAppAutomationReportB
         this.buildName = buildName;
     }
     public void generateLambdaTestAppAutomationReport() {
-        logger.info("authString : " + authString);
         byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
         String authStringEnc = new String(authEncBytes);
-        logger.info("in generate generateLambdaTestAppAutomationReport function");
         try {
             URL buildUrl = new URL(Constant.AppAutomationReport.BUILD_INFO_URL);
             URLConnection buildUrlConnection = buildUrl.openConnection();

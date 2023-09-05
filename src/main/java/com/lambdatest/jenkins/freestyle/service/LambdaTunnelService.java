@@ -59,9 +59,10 @@ public class LambdaTunnelService {
 							logger.info("Tunnel Binary downloaded from " + Constant.LINUX_BINARY_URL);
 						}
 						// Get Tunnel Log path name
+						String tunnelPidPath = getPidPath(workspacePath, buildnumber);
 						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel, tunnelPidPath);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -95,9 +96,10 @@ public class LambdaTunnelService {
 							logger.info("Tunnel Binary downloaded from " + Constant.MAC_BINARY_URL);
 						}
 						// Get Tunnel Log path name
+						String tunnelPidPath = getPidPath(workspacePath, buildnumber);
 						String tunnelLogPath = getTunnelLogPath(workspacePath, buildnumber);
 						logger.info("Tunnel Log Path:" + tunnelLogPath);
-						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel);
+						return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel, tunnelPidPath);
 					} else {
 						logger.warning("tunnelFolderPath empty");
 					}
@@ -131,9 +133,10 @@ public class LambdaTunnelService {
 						logger.info("Tunnel Binary downloaded from " + binaryURL);
 					}
 					// Get Tunnel Log path name
+					String tunnelPidPath = getTunnelPidPathForWindows(workspacePath, buildnumber);
 					String tunnelLogPath = getTunnelLogPathForWindows(workspacePath, buildnumber);
 					logger.info("Tunnel Log Path:" + tunnelLogPath);
-					return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel,Constant.OS.WIN);
+					return runCommandLine(tunnelBinaryLocation, tunnelLogPath, user, key, tunnelName,localTunnel,tunnelPidPath, Constant.OS.WIN);
 				} else {
 					logger.warning("tunnelFolderPath empty");
 				}
@@ -210,6 +213,36 @@ public class LambdaTunnelService {
 		}
 		return tunnelLogPath;
 	}
+	private static String getPidPath(FilePath workspacePath, String buildnumber) {
+		String tunnelPidPath = ".pid";
+		try {
+			if (workspacePath != null) {
+				// Create Tunnel Log Path
+				tunnelPidPath = new StringBuilder(buildnumber).append(".pid").toString();
+
+				// Create a Folder in workspace
+				FilePath tunnelFolderPath = new FilePath(workspacePath, Constant.DEFAULT_TUNNEL_FOLDER_NAME);
+				File folder = new File(tunnelFolderPath.getRemote());
+				if (!folder.exists()) {
+					if (folder.mkdir()) {
+						logger.info("Directory is created! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelPidPath);
+						return tunnelPath.getRemote();
+					} else {
+						logger.info("Failed to create directory! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(workspacePath, tunnelPidPath);
+						return tunnelPath.getRemote();
+					}
+				} else {
+					FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelPidPath);
+					return tunnelPath.getRemote();
+				}
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return tunnelPidPath;
+	}
 
 	private static String getTunnelLogPathForWindows(FilePath workspacePath, String buildnumber) {
 		String tunnelLogPath = "tunnel.log";
@@ -240,6 +273,37 @@ public class LambdaTunnelService {
 			logger.info(e.getMessage());
 		}
 		return tunnelLogPath;
+	}
+
+	private static String getTunnelPidPathForWindows(FilePath workspacePath, String buildnumber) {
+		String tunnelPidPath = ".pid";
+		try {
+			if (workspacePath != null) {
+				// Create Tunnel Log Path
+				tunnelPidPath = new StringBuilder(buildnumber).append(".log").toString();
+
+				// Create a Folder in workspace
+				FilePath tunnelFolderPath = new FilePath(workspacePath, Constant.DEFAULT_TUNNEL_FOLDER_NAME);
+				File folder = new File(tunnelFolderPath.getRemote());
+				if (!folder.exists()) {
+					if (folder.mkdir()) {
+						logger.info("Directory is created! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelPidPath);
+						return tunnelPath.getRemote();
+					} else {
+						logger.info("Failed to create directory! at " + tunnelFolderPath.getRemote());
+						FilePath tunnelPath = new FilePath(workspacePath, tunnelPidPath);
+						return tunnelPath.getRemote();
+					}
+				} else {
+					FilePath tunnelPath = new FilePath(tunnelFolderPath, tunnelPidPath);
+					return tunnelPath.getRemote();
+				}
+			}
+		} catch (Exception e) {
+			logger.info(e.getMessage());
+		}
+		return tunnelPidPath;
 	}
 
 	private static String getLatestHash(String url) throws TunnelHashNotFoundException {
@@ -327,7 +391,7 @@ public class LambdaTunnelService {
 	}
 
 	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key,
-										 String tunnelName, LocalTunnel localTunnel,String ...args) throws IOException {
+										 String tunnelName, LocalTunnel localTunnel, String tunnelPidPath, String ...args) throws IOException {
 		try {
 			int availablePort= PortAvailabilityUtils.randomFreePort();
 			//Updating permissions
@@ -351,6 +415,7 @@ public class LambdaTunnelService {
 				list.addAll(Arrays.asList(extCommands));
 			}
 			list.add("-v");
+			list.add("--pidfile");list.add(tunnelPidPath);
 
 			// create the process
 			ProcessBuilder processBuilder = new ProcessBuilder(list);

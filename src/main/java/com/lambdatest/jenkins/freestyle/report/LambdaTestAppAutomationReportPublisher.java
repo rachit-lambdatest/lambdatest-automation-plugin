@@ -39,7 +39,7 @@ public class LambdaTestAppAutomationReportPublisher extends Recorder implements 
         final String accessKey = parentEnvs.get(Constant.LT_ACCESS_KEY);
         final String buildName = parentEnvs.get(Constant.LT_BUILD_NAME);
 
-        logger.info("Generating LambdaTest App Automation Report" + "\n" + "username : " + username + "\n" +  "accessKey : " + accessKey + "\n" + "buildName : " + buildName);
+        logger.info("Generating LambdaTest App Automation Report" +  "\n" + "buildName : " + buildName);
         AppAutomationReportBuildAction ltReportAction = new AppAutomationReportBuildAction(build, username, accessKey, buildName);
         ltReportAction.generateLambdaTestAppAutomationReport();
         build.addAction(ltReportAction);

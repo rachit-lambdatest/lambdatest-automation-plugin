@@ -35,7 +35,6 @@ public class ReportBuildAction extends AbstractReportBuildAction {
         this.buildName = buildName;
     }
     public void generateLambdaTestReport() {
-        logger.info("authString : " + authString);
         byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
         String authStringEnc = new String(authEncBytes);
         logger.info("in generate generateLambdaTestReport function");

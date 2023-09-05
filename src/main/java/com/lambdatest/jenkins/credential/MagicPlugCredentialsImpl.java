@@ -83,7 +83,6 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 
 		public FormValidation doVerifyCredentials(@QueryParameter("userName") final String userName,
 				@QueryParameter("accessToken") final String accessToken) throws IOException, ServletException {
-				logger.info(userName + ":" + accessToken);
 			if (StringUtils.isBlank(userName) || StringUtils.isBlank(accessToken)) {
 				return FormValidation.error("Please enter valid username and authKey");
 			}

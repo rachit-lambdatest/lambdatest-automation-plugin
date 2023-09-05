@@ -1,5 +1,7 @@
 package com.lambdatest.jenkins.freestyle;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -171,11 +173,10 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 		// Create Grid URL
 		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
-			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
-		logger.info(this.gridURL);
+			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest)) {
 			logger.info("appAutomationCR : " + appAutomationCapabilityRequest);
-			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getPlainText(),"production");
+			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		}
 		logger.info("grid URL : " + this.gridURL);
 		return new MagicPlugEnvironment(build);
@@ -302,34 +303,65 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			/*
 			 * Runs after the build
 			 */
+			String buildnumber = String.valueOf(build.getNumber());
+		
 			try {
 				logger.info("tearDown");
-				int x=1;
-				while(x!=-1) {
-					x=stopTunnel();
+				int result = stopTunnel(buildnumber, build.getWorkspace());
+		
+				if (result == -1) {
+					logger.info("Tunnel was not active.");
+				} else {
+					logger.info("Tunnel stopped successfully.");
 				}
 			} catch (Exception e) {
-				logger.warning("Forcefully Tear Down due to :"+e.getMessage());
+				logger.warning("Forcefully Tear Down due to: " + e.getMessage());
 				if (tunnelProcess != null && tunnelProcess.isAlive()) {
 					tunnelProcess.destroy();
 				}
 			}
 			return super.tearDown(build, listener);
-		}
-		
-		private int stopTunnel() throws IOException, InterruptedException {
+		}	
+	
+		private int stopTunnel(String buildnumber, FilePath workspacePath) throws IOException, InterruptedException {
 			if (tunnelProcess != null && tunnelProcess.isAlive()) {
-				logger.info("tunnel is active, going to stop tunnel binary");
+				logger.info("Tunnel is active, going to stop the tunnel binary");
+		
 				if (OSValidator.isWindows()) {
 					tunnelProcess.destroy();
 					logger.info("Windows Tunnel Stopped");
 					return 10;
 				}
-				long tunnelProcessId=getPidOfProcess(tunnelProcess);
+		
+				long tunnelProcessId = getPidOfProcess(tunnelProcess);
+		
+				logger.info("Tunnel is active, with tunnelProcessId: " + tunnelProcessId);
+		
+				if (tunnelProcessId == -1) {
+					String pidFilePath = workspacePath + "/lambda-tunnel/" + buildnumber + ".pid";
+					logger.info(pidFilePath);
+		
+					try (BufferedReader br = new BufferedReader(new FileReader(pidFilePath))) {
+						String pidString = br.readLine();
+		
+						if (pidString != null) {
+							long pid = Integer.parseInt(pidString.trim());
+							stopTunnelProcessUsingPID(pid);
+							return 10;
+						} else {
+							logger.info("PID not found in the file.");
+							return -1;
+						}
+					} catch (IOException e) {
+						logger.info("Error reading PID file: " + e.getMessage());
+						return -1;
+					}
+				}
+		
 				stopTunnelProcessUsingPID(tunnelProcessId);
 				Thread.sleep(2000);
 				return 10;
-			}else {
+			} else {
 				logger.info("Tunnel Stopped");
 				return -1;
 			}
