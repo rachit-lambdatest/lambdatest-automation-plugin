@@ -38,6 +38,8 @@ public class AppAutomationReportBuildAction extends AbstractAppAutomationReportB
         byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
         String authStringEnc = new String(authEncBytes);
         try {
+            // Add a 5-second sleep
+            Thread.sleep(5000);
             URL buildUrl = new URL(Constant.AppAutomationReport.BUILD_INFO_URL);
             URLConnection buildUrlConnection = buildUrl.openConnection();
             buildUrlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
@@ -125,7 +127,9 @@ public class AppAutomationReportBuildAction extends AbstractAppAutomationReportB
         } catch (IOException e) {
             logger.warning("IOException : " + e.getMessage());
             e.printStackTrace();
-                }
+                } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
     }
 
     public List<JSONObject> getResult() {
