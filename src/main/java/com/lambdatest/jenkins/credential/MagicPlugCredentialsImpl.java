@@ -3,6 +3,7 @@ package com.lambdatest.jenkins.credential;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -32,15 +33,15 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 	private final String userName;
 	private final Secret accessToken;
 
+	private static final Logger logger = Logger.getLogger(MagicPlugCredentialsImpl.class.getName());
+
 	@DataBoundConstructor
 	public MagicPlugCredentialsImpl(CredentialsScope scope, String id, String description, String userName,
 			String accessToken) throws Exception {
 		super(scope, id, description);
 		try {
-			System.out.println("MagicPlugCredentialsImpl");
 			this.userName = userName;
 			this.accessToken = Secret.fromString(accessToken);
-			System.out.println("Here We can Verify Credentials Also before Adding");
 			if (!CapabilityService.isValidUser(userName, accessToken)) {
 				throw new Exception("Invalid username and access Token");
 			}
@@ -82,7 +83,6 @@ public class MagicPlugCredentialsImpl extends BaseStandardCredentials implements
 
 		public FormValidation doVerifyCredentials(@QueryParameter("userName") final String userName,
 				@QueryParameter("accessToken") final String accessToken) throws IOException, ServletException {
-			System.out.println(userName + ":" + accessToken);
 			if (StringUtils.isBlank(userName) || StringUtils.isBlank(accessToken)) {
 				return FormValidation.error("Please enter valid username and authKey");
 			}

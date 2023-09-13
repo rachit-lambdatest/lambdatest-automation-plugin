@@ -49,6 +49,32 @@
 				</table>
 			</f:repeatable>
 		</f:entry>
+		<f:entry title="Real Device App Automation Tests">
+			<f:repeatable var="appAutomationCapabilityRequest" items="${instance.appAutomationCapabilityRequest}"  add="Add App Automation Test Capability">
+				<table width="100%">
+					<f:entry title="Platform Name" field="platformName">
+						<f:select value="${appAutomationCapabilityRequest.platformName}" />
+					</f:entry>
+					<f:entry title="Brand Name" progress="Loading" field="brandName">
+						<f:select value="${appAutomationCapabilityRequest.brandName}" />
+					</f:entry>
+					<f:entry title="Device Name" progress="Loading" field="deviceName">
+						<f:select value="${appAutomationCapabilityRequest.deviceName}" />
+					</f:entry>
+					<f:entry title="Device Version" progress="Loading" field="deviceVersion">
+						<f:select value="${appAutomationCapabilityRequest.deviceVersion}"/>
+					</f:entry>
+					<f:entry title="App Id" field="appId">
+						<f:textbox value="${appAutomationCapabilityRequest.appId}"/>
+					</f:entry>
+					<f:entry title="">
+						<div align="right">
+							<f:repeatableDeleteButton value="Delete Real Device App Automation Test" />
+						</div>
+					</f:entry>
+				</table>
+			</f:repeatable>
+		</f:entry>
 		<f:optionalBlock title="Use Local Tunnel" field="localTunnel" checked="${instance.useLocalTunnel}">
 		     <f:entry title="Tunnel Name" field="tunnelName">
 		       <f:textbox field="tunnelName" value="${instance.tunnelName()}"/>

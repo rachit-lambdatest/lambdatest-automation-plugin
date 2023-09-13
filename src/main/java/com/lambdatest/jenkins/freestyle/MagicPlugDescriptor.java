@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.servlet.ServletException;
 
@@ -16,6 +17,8 @@ import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
+import com.lambdatest.jenkins.freestyle.data.AppAutomationCapabilityRequest;
+import com.lambdatest.jenkins.freestyle.api.service.AppAutomationCapabilityService;
 
 import hudson.Extension;
 import hudson.model.AbstractProject;
@@ -26,6 +29,8 @@ import hudson.util.ListBoxModel;
 
 @Extension
 public class MagicPlugDescriptor extends BuildWrapperDescriptor {
+
+	private final static Logger logger = Logger.getLogger(MagicPlugDescriptor.class.getName());
 
 	@Override
 	public boolean isApplicable(AbstractProject<?, ?> item) {
@@ -43,7 +48,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	}
 
 	public FormValidation doPing() throws IOException, ServletException {
-		System.out.println("doPing");
+		logger.info("doPing");
 		if (new CapabilityService().ping()) {
 			return FormValidation.ok("Ping Successful");
 		} else {
@@ -72,7 +77,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			items.add(Constant.DEFAULT_BROWSER_NAME_VALUE, Constant.EMPTY);
 			return items;
 		}
-		System.out.println(operatingSystem);
+		logger.info("operatingSystem : +" + operatingSystem);
 		Set<String> supportedBrowsers = CapabilityService.getBrowserNames(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
@@ -85,10 +90,10 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	public ListBoxModel doFillBrowserVersionItems(@QueryParameter String operatingSystem,
 			@QueryParameter String browserName) {
 		ListBoxModel items = new ListBoxModel();
-		System.out.println(operatingSystem + "::" + browserName);
+		logger.info(operatingSystem + "::" + browserName);
 		if (!StringUtils.isBlank(operatingSystem) && StringUtils.isBlank(browserName)) {
 			browserName = "Chrome";
-			System.out.println("Chrome added");
+			logger.info("Chrome added");
 		} else if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
 			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 			return items;
@@ -108,7 +113,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			items.add(Constant.DEFAULT_RESOLUTION_VALUE, Constant.EMPTY);
 			return items;
 		}
-		System.out.println(operatingSystem);
+		logger.info("operatingSystem : " + operatingSystem);
 		List<String> supportedBrowsers = CapabilityService.getResolutions(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
@@ -120,9 +125,9 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 
 	public ListBoxModel doFillCredentialsIdItems(@QueryParameter String credentialsId) {
 		if (!StringUtils.isBlank(credentialsId)) {
-			System.out.println(credentialsId);
+			logger.info(credentialsId);
 		} else {
-			System.out.println("Not Found");
+			logger.info("Not Found");
 		}
 		return new ListBoxModel();
 	}
@@ -131,4 +136,81 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		return new StandardListBoxModel().withEmptySelection().withMatching(CredentialsMatchers.always(),
 				MagicPlugCredentialsImpl.all(context));
 	}
+
+	public ListBoxModel doFillPlatformNameItems() {
+		Map<String, String> supportedPlatforms = AppAutomationCapabilityService.getPlatformNames();
+		logger.info("OS triggered : " + supportedPlatforms);
+		ListBoxModel items = new ListBoxModel();
+		items.add(Constant.DEFAULT_PLATFORM_NAME_VALUE, Constant.EMPTY);
+		supportedPlatforms.forEach((key, value) -> {
+			items.add(value, key);
+		});
+		return items;
+	}
+
+	public ListBoxModel doFillBrandNameItems(@QueryParameter String platformName) {
+		ListBoxModel items = new ListBoxModel();
+		if (StringUtils.isBlank(platformName)) {
+			items.add(Constant.DEFAULT_BRAND_NAME_VALUE, Constant.EMPTY);
+			return items;
+		}
+		logger.info("platformName : " + platformName);
+		Set<String> supportedBrands = AppAutomationCapabilityService.getBrandNames(platformName);
+		logger.info("Brand Names triggered : " + supportedBrands);
+		if (!CollectionUtils.isEmpty(supportedBrands)) {
+			supportedBrands.forEach(br -> {
+				items.add(br, br);
+			});
+		}
+		return items;
+	}
+
+	public ListBoxModel doFillDeviceNameItems(@QueryParameter String platformName, @QueryParameter String brandName) {
+		ListBoxModel items = new ListBoxModel();
+		logger.info(platformName + "::" + brandName);
+		if (!StringUtils.isBlank(platformName) && StringUtils.isBlank(brandName)) {
+			brandName = "Asus";
+			logger.info("Asus added");
+		} else if (StringUtils.isBlank(platformName) || StringUtils.isBlank(brandName)) {
+			items.add(Constant.DEFAULT_DEVICE_NAME_VALUE, Constant.EMPTY);
+			return items;
+		}
+		logger.info("platformName : " + platformName + "\n" + "brandName : " + brandName);
+		Set<String> supportedDevices = AppAutomationCapabilityService.getDeviceNames(platformName, brandName);
+		logger.info("Device Names triggered : " + supportedDevices);
+		if (!CollectionUtils.isEmpty(supportedDevices)) {
+			supportedDevices.forEach(br -> {
+				items.add(br, br);
+			});
+		}
+		return items;
+	}
+
+	public ListBoxModel doFillDeviceVersionItems(@QueryParameter String platformName,
+			@QueryParameter String deviceName) {
+		ListBoxModel items = new ListBoxModel();
+		logger.info(platformName + "::" + deviceName);
+		if (!StringUtils.isBlank(platformName) && StringUtils.isBlank(deviceName)) {
+			deviceName = "Zenfone 6";
+			logger.info("Zenfone 6 added");
+		} else if (StringUtils.isBlank(platformName) || StringUtils.isBlank(deviceName)) {
+			items.add(Constant.DEFAULT_DEVICE_VERSION_VALUE, Constant.EMPTY);
+			return items;
+		}
+		Set<String> supportedDeviceVersions = AppAutomationCapabilityService.getDeviceVersions(platformName, deviceName);
+		logger.info("Device Versions triggered : " + supportedDeviceVersions);
+		if (!CollectionUtils.isEmpty(supportedDeviceVersions)) {
+			supportedDeviceVersions.forEach(ver -> {
+				items.add(ver, ver);
+			});
+		}
+		return items;
+	}
+
+	public ListBoxModel doFillAppId() {
+		ListBoxModel items = new ListBoxModel();
+		items.add(Constant.DEFAULT_APP_ID, Constant.EMPTY);
+		return items;
+	}
+
 }

@@ -114,7 +114,7 @@ public class CapabilityService {
 				supportedBrowserVersions.add(bv.getVersion());
 			});
 		} else {
-			//System.out.println(vk + " not found");
+			logger.info(vk + " not found");
 		}
 		return supportedBrowserVersions;
 	}

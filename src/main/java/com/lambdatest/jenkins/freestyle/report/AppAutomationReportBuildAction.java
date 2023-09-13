@@ -21,25 +21,26 @@ import java.net.URLConnection;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class ReportBuildAction extends AbstractReportBuildAction {
-    private final static Logger logger = Logger.getLogger(ReportBuildAction.class.getName());
-    private String lambdaTestBuildBrowserUrl;
+public class AppAutomationReportBuildAction extends AbstractAppAutomationReportBuildAction {
+    private final static Logger logger = Logger.getLogger(AppAutomationReportBuildAction.class.getName());
+    private String lambdaTestBuildDeviceUrl;
     private String authString;
     private String buildName;
     private transient List < JSONObject > result = new ArrayList < JSONObject > ();
 
-    public ReportBuildAction(final Run<?, ?> build, String name,String password, String buildName) {
+    public AppAutomationReportBuildAction(final Run<?, ?> build, String name,String password, String buildName) {
         super();
         setBuild(build);
         this.authString =  name + ":" + password;
         this.buildName = buildName;
     }
-    public void generateLambdaTestReport() {
+    public void generateLambdaTestAppAutomationReport() {
         byte[] authEncBytes = Base64.getEncoder().encode(authString.getBytes());
         String authStringEnc = new String(authEncBytes);
-        logger.info("in generate generateLambdaTestReport function");
         try {
-            URL buildUrl = new URL(Constant.Report.BUILD_INFO_URL);
+            // Add a 5-second sleep
+            Thread.sleep(5000);
+            URL buildUrl = new URL(Constant.AppAutomationReport.BUILD_INFO_URL);
             URLConnection buildUrlConnection = buildUrl.openConnection();
             buildUrlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
             InputStream is = buildUrlConnection.getInputStream();
@@ -61,10 +62,10 @@ public class ReportBuildAction extends AbstractReportBuildAction {
                     if (buildDetailNode.get("name").toString().replaceAll("\"", "").equals(buildName)) {
                         String build_id = buildDetailNode.get("build_id").toString();
 
-                        lambdaTestBuildBrowserUrl = "https://automation.lambdatest.com/logs/?build=" + build_id;
+                        lambdaTestBuildDeviceUrl = Constant.APP_AUTOMATION_APP_URL + "/test?buildid=" + build_id;
 
-                        logger.info("lambdaTestBuildBrowserUrl : " + lambdaTestBuildBrowserUrl);
-                        URL sessionUrl = new URL(Constant.Report.SESSION_INFO_URL + "?limit=100&build_id=" + build_id);
+                        logger.info("lambdaTestBuildDeviceUrl : " + lambdaTestBuildDeviceUrl);
+                        URL sessionUrl = new URL(Constant.AppAutomationReport.SESSION_INFO_URL + "?limit=100&build_id=" + build_id);
                         URLConnection sessionUrlConnection = sessionUrl.openConnection();
                         sessionUrlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
                         is = sessionUrlConnection.getInputStream();
@@ -84,44 +85,50 @@ public class ReportBuildAction extends AbstractReportBuildAction {
                         JSONArray array = new JSONArray();
                         while (sessionDataIterator.hasNext()) {
                             JsonNode sessionDetailNode = sessionDataIterator.next();
-                            String testUrl = "https://automation.lambdatest.com/logs/?testID=" + sessionDetailNode.get("test_id").toString().replaceAll("\"", "") + "&page=1&build=" + build_id;
+                            logger.info("sessiondetailnode : " + sessionDataNode.toString());
+                            String testUrl = Constant.APP_AUTOMATION_APP_URL + "/test?testID=" + sessionDetailNode.get("test_id").toString().replaceAll("\"", "") + "&buildid=" + build_id;
                             logger.info("testUrl : " + testUrl);
                             JSONObject resultJSON = new JSONObject();
                             resultJSON.put("url",testUrl);
-                            resultJSON.put("status",sessionDetailNode.get("status_ind").toString().replaceAll("\"", ""));
-                            if(sessionDetailNode.has("device")) {
-                                resultJSON.put("browser",sessionDetailNode.get("device").toString().replaceAll("\"", ""));
-                            } else {
-                                resultJSON.put("browser",sessionDetailNode.get("browser").toString().replaceAll("\"", ""));
-                            }
-                            resultJSON.put("browserVersion",sessionDetailNode.get("version").toString().replaceAll("\"", ""));
+                            resultJSON.put("deviceVersion",sessionDetailNode.get("version").toString().replaceAll("\"", ""));
                             resultJSON.put("OS",sessionDetailNode.get("platform").toString().replaceAll("\"", ""));
-                            resultJSON.put("name",sessionDetailNode.get("name").toString().replaceAll("\"", ""));
                             resultJSON.put("testId",sessionDetailNode.get("test_id").toString().replaceAll("\"", ""));
-                            resultJSON.put("testDuration",sessionDetailNode.get("duration").toString().replaceAll("\"", ""));
+                            resultJSON.put("buildId",sessionDetailNode.get("build_id").toString().replaceAll("\"", ""));
+                            resultJSON.put("name",sessionDetailNode.get("name").toString().replaceAll("\"", ""));
                             resultJSON.put("createdAtReadable",sessionDetailNode.get("create_timestamp").toString().replaceAll("\"", ""));
+                            resultJSON.put("testDuration",sessionDetailNode.get("duration").toString().replaceAll("\"", ""));
+                            resultJSON.put("status",sessionDetailNode.get("status_ind").toString().replaceAll("\"", ""));
+                            resultJSON.put("browser",sessionDetailNode.get("device").toString().replaceAll("\"", ""));
                             array.put(resultJSON);
                         }
                         for (int i = 0; i < array.length(); i++) {
                             result.add(array.getJSONObject(i));
                         }
-                        logger.info(result.toString());
+                        logger.info("result : " + result.toString());
                         break;
                     }
                 }
             } catch (JsonParseException e) {
+                logger.warning("JsonParseException : " + e.getMessage());
                 e.printStackTrace();
             } catch (JsonMappingException e) {
+                logger.warning("JsonMappingException : " + e.getMessage());
                 e.printStackTrace();
             } catch (IOException e) {
+                logger.warning("IOException : " + e.getMessage());
                 e.printStackTrace();
             } catch (JSONException e) {
+                logger.warning("JSONException : " + e.getMessage());
                 e.printStackTrace();
             }
         } catch (MalformedURLException e) {
+            logger.warning("MalformedURLException : " + e.getMessage());
             e.printStackTrace();
         } catch (IOException e) {
+            logger.warning("IOException : " + e.getMessage());
             e.printStackTrace();
+                } catch (InterruptedException e1) {
+            e1.printStackTrace();
         }
     }
 
@@ -129,8 +136,8 @@ public class ReportBuildAction extends AbstractReportBuildAction {
         return result;
     }
 
-    public String getLambdaTestBuildBrowserUrl() {
-        return lambdaTestBuildBrowserUrl;
+    public String getLambdaTestBuilddeviceUrl() {
+        return lambdaTestBuildDeviceUrl;
     }
 
     public String getBuildName() {
