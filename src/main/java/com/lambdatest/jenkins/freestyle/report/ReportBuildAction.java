@@ -39,6 +39,8 @@ public class ReportBuildAction extends AbstractReportBuildAction {
         String authStringEnc = new String(authEncBytes);
         logger.info("in generate generateLambdaTestReport function");
         try {
+            // Add a 5-second sleep
+            Thread.sleep(5000);
             URL buildUrl = new URL(Constant.Report.BUILD_INFO_URL);
             URLConnection buildUrlConnection = buildUrl.openConnection();
             buildUrlConnection.setRequestProperty("Authorization", "Basic " + authStringEnc);
@@ -61,8 +63,7 @@ public class ReportBuildAction extends AbstractReportBuildAction {
                     if (buildDetailNode.get("name").toString().replaceAll("\"", "").equals(buildName)) {
                         String build_id = buildDetailNode.get("build_id").toString();
 
-                        lambdaTestBuildBrowserUrl = "https://automation.lambdatest.com/logs/?build=" + build_id;
-
+                        lambdaTestBuildBrowserUrl = "https://automation.lambdatest.com/build?&build=" + build_id;
                         logger.info("lambdaTestBuildBrowserUrl : " + lambdaTestBuildBrowserUrl);
                         URL sessionUrl = new URL(Constant.Report.SESSION_INFO_URL + "?limit=100&build_id=" + build_id);
                         URLConnection sessionUrlConnection = sessionUrl.openConnection();
@@ -96,7 +97,12 @@ public class ReportBuildAction extends AbstractReportBuildAction {
                             }
                             resultJSON.put("browserVersion",sessionDetailNode.get("version").toString().replaceAll("\"", ""));
                             resultJSON.put("OS",sessionDetailNode.get("platform").toString().replaceAll("\"", ""));
-                            resultJSON.put("name",sessionDetailNode.get("name").toString().replaceAll("\"", ""));
+                            
+                            if(sessionDetailNode.has("name")) {
+                                resultJSON.put("name",sessionDetailNode.get("name").toString().replaceAll("\"", ""));
+                            } else {
+                                resultJSON.put("name",sessionDetailNode.get("test_id").toString().replaceAll("\"", ""));
+                            }
                             resultJSON.put("testId",sessionDetailNode.get("test_id").toString().replaceAll("\"", ""));
                             resultJSON.put("testDuration",sessionDetailNode.get("duration").toString().replaceAll("\"", ""));
                             resultJSON.put("createdAtReadable",sessionDetailNode.get("create_timestamp").toString().replaceAll("\"", ""));
@@ -122,6 +128,9 @@ public class ReportBuildAction extends AbstractReportBuildAction {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (InterruptedException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
         }
     }
 
