@@ -61,6 +61,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private String tunnelExtCommand;
 	private Process tunnelProcess;
 	private UserAuthResponse userAuthResponse;
+	private boolean appAutomation;
 	
 	//To Save Download Tunnel location
 	private String downloadTunnelPath;
@@ -71,7 +72,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	
 	@DataBoundConstructor
 	public MagicPlugBuildWrapper(StaplerRequest req, @CheckForNull List<JSONObject> seleniumCapabilityRequest, @CheckForNull List<JSONObject> appAutomationCapabilityRequest,
-			@CheckForNull String credentialsId, String choice, boolean useLocalTunnel, LocalTunnel localTunnel,
+			@CheckForNull String credentialsId, String choice, boolean useLocalTunnel, boolean appAutomation, LocalTunnel localTunnel,
 			ItemGroup context) throws Exception {
 		try {
 			choice = "prod";
@@ -91,6 +92,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			}
 			// Setting up credentials in both case if input capabilities are there or not
 			this.choice = choice;
+			this.appAutomation = appAutomation;
 			setLambdaTestCredentials(credentialsId, context);
 			setCredentialsId(credentialsId);
 			if (localTunnel != null) {
@@ -174,7 +176,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		// Create Grid URL
 		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
 			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
-		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest)) {
+		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest) || this.appAutomation) {
 			logger.info("appAutomationCR : " + appAutomationCapabilityRequest);
 			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		}
@@ -235,6 +237,9 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			env.put(Constant.LT_BROWSERS, createBrowserJSON(seleniumCapabilityRequest));
 			env.put(Constant.LT_BRANDS, createBrandJSON(appAutomationCapabilityRequest));
 			env.put(Constant.LT_DEVICES, createDeviceJSON(appAutomationCapabilityRequest));
+			if (gridURL == null){
+				gridURL = CapabilityService.buildHubURL(username, accessToken.getEncryptedValue(),"production");
+			}
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
 			env.put(Constant.LT_BUILD_NUMBER, buildnumber);
@@ -528,6 +533,13 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 	public void setUseWorkspacePath(boolean useWorkspacePath) {
 		this.useWorkspacePath = useWorkspacePath;
+	}
+
+	public boolean isAppAutomation() {
+		return appAutomation;
+	}
+	public void setAppAutomation(boolean appAutomation) {
+		this.appAutomation = appAutomation;
 	}
 
 	

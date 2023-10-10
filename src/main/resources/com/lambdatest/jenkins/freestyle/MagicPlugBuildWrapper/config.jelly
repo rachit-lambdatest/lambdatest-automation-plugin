@@ -50,6 +50,9 @@
 			</f:repeatable>
 		</f:entry>
 		<f:entry title="Real Device App Automation Tests">
+			 <f:entry title="Enable App Automation" field="appAutomation">
+        		<f:checkbox checked="${instance.appAutomation}"/>
+    		</f:entry>
 			<f:repeatable var="appAutomationCapabilityRequest" items="${instance.appAutomationCapabilityRequest}"  add="Add App Automation Test Capability">
 				<table width="100%">
 					<f:entry title="Platform Name" field="platformName">
