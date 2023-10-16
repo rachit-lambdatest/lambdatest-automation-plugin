@@ -108,7 +108,7 @@
                 <div style="border-style: solid;border-width: thin;">
                     <div align="center">
                         <h3>
-                            Build Name: <a href="${it.lambdaTestBuildBrowserUrl}" target="_blank">${it.buildName}</a>
+                            Build Name: <a href="${it.lambdaTestBuildDeviceUrl}" target="_blank">${it.buildName}</a>
                          </h3>
                     </div>
                 </div>

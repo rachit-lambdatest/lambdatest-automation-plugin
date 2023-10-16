@@ -62,7 +62,7 @@ public class AppAutomationReportBuildAction extends AbstractAppAutomationReportB
                     if (buildDetailNode.get("name").toString().replaceAll("\"", "").equals(buildName)) {
                         String build_id = buildDetailNode.get("build_id").toString();
 
-                        lambdaTestBuildDeviceUrl = Constant.APP_AUTOMATION_APP_URL + "/test?buildid=" + build_id;
+                        lambdaTestBuildDeviceUrl = "https://appautomation.lambdatest.com/build/?searchtxt=" + build_id;
 
                         logger.info("lambdaTestBuildDeviceUrl : " + lambdaTestBuildDeviceUrl);
                         URL sessionUrl = new URL(Constant.AppAutomationReport.SESSION_INFO_URL + "?limit=100&build_id=" + build_id);
@@ -136,7 +136,7 @@ public class AppAutomationReportBuildAction extends AbstractAppAutomationReportB
         return result;
     }
 
-    public String getLambdaTestBuilddeviceUrl() {
+    public String getLambdaTestBuildDeviceUrl() {
         return lambdaTestBuildDeviceUrl;
     }
 
