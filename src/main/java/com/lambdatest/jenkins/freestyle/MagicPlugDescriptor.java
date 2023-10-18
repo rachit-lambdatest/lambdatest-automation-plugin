@@ -26,6 +26,7 @@ import hudson.model.ItemGroup;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
+import jenkins.model.Jenkins;
 
 @Extension
 public class MagicPlugDescriptor extends BuildWrapperDescriptor {
@@ -133,9 +134,15 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	}
 
 	public ListBoxModel doFillCredentialsIdItems(ItemGroup context) {
-		return new StandardListBoxModel().withEmptySelection().withMatching(CredentialsMatchers.always(),
+		
+		if (Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
+			return new StandardListBoxModel().withEmptySelection().withMatching(CredentialsMatchers.always(),
 				MagicPlugCredentialsImpl.all(context));
+		}
+		return new ListBoxModel();
 	}
+
+
 
 	public ListBoxModel doFillPlatformNameItems() {
 		Map<String, String> supportedPlatforms = AppAutomationCapabilityService.getPlatformNames();
