@@ -59,7 +59,6 @@ public class LambdaTestReportStepExecution extends SynchronousNonBlockingStepExe
         final String username = parentContextEnvVars.get(Constant.LT_USERNAME);
         final String accessKey = parentContextEnvVars.get(Constant.LT_ACCESS_KEY);
 
-        logger.info("username : " + username);
         logger.info("buildName : " + buildName);
         
         final ReportBuildAction ltReportAction =
