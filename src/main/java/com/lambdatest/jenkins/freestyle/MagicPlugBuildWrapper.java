@@ -177,10 +177,8 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
 			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest) || this.appAutomation) {
-			logger.info("appAutomationCR : " + appAutomationCapabilityRequest);
 			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		}
-		logger.info("grid URL : " + this.gridURL);
 		return new MagicPlugEnvironment(build);
 	}
 

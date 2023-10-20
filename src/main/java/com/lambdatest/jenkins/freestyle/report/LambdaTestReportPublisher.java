@@ -42,9 +42,6 @@ public class LambdaTestReportPublisher extends Recorder implements SimpleBuildSt
         final String buildName = parentEnvs.get(Constant.LT_BUILD_NAME);
 
         logger.info("Generating LambdaTest Report");
-        logger.info("username : " + username);
-        logger.info("accessKey : " + accessKey);
-        logger.info("buildName : " + buildName);
         ReportBuildAction ltReportAction = new ReportBuildAction(build, username, accessKey, buildName);
         ltReportAction.generateLambdaTestReport();
         build.addAction(ltReportAction);

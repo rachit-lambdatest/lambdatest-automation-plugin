@@ -41,8 +41,6 @@ public abstract class LambdaTestReportPublisher extends Recorder implements Simp
         final String username = parentEnvs.get(Constant.LT_USERNAME);
         final String accessKey = parentEnvs.get(Constant.LT_ACCESS_KEY);
         final String buildName = parentEnvs.get(Constant.LT_BUILD_NAME);
-
-        logger.info("username : " + username);
         logger.info("buildName : " + buildName);
 
         ProjectType product = ProjectType.AUTOMATION;
