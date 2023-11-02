@@ -8,25 +8,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 import hudson.model.Item;
-import org.acegisecurity.Authentication;
-import org.acegisecurity.providers.anonymous.AnonymousAuthenticationToken;
 import hudson.security.ACL;
 
 
 
 import javax.servlet.ServletException;
-
-import org.acegisecurity.providers.anonymous.AnonymousAuthenticationToken;
 import org.apache.commons.lang.StringUtils;
-import org.kohsuke.stapler.AncestorInPath;
 import org.kohsuke.stapler.QueryParameter;
 import org.springframework.util.CollectionUtils;
 
 import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
-import com.cloudbees.plugins.credentials.CredentialsProvider;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
-import com.cloudbees.plugins.credentials.domains.DomainRequirement;
 import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
 import com.lambdatest.jenkins.freestyle.api.Constant;
 import com.lambdatest.jenkins.freestyle.api.service.CapabilityService;
@@ -36,7 +29,6 @@ import com.lambdatest.jenkins.freestyle.api.service.AppAutomationCapabilityServi
 import hudson.Extension;
 import hudson.model.AbstractProject;
 import hudson.model.ItemGroup;
-import hudson.security.ACL;
 import hudson.tasks.BuildWrapperDescriptor;
 import hudson.util.FormValidation;
 import hudson.util.ListBoxModel;
