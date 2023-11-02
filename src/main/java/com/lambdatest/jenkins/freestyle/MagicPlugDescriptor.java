@@ -1,17 +1,23 @@
 package com.lambdatest.jenkins.freestyle;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import hudson.model.Item;
+import hudson.security.ACL;
+
+
 
 import javax.servlet.ServletException;
-
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.QueryParameter;
 import org.springframework.util.CollectionUtils;
 
+import com.cloudbees.plugins.credentials.CredentialsMatcher;
 import com.cloudbees.plugins.credentials.CredentialsMatchers;
 import com.cloudbees.plugins.credentials.common.StandardListBoxModel;
 import com.lambdatest.jenkins.credential.MagicPlugCredentialsImpl;
@@ -133,16 +139,30 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		return new ListBoxModel();
 	}
 
-	public ListBoxModel doFillCredentialsIdItems(ItemGroup context) {
-		
-		if (Jenkins.get().hasPermission(Jenkins.ADMINISTER)) {
-			return new StandardListBoxModel().withEmptySelection().withMatching(CredentialsMatchers.always(),
-				MagicPlugCredentialsImpl.all(context));
+
+	public ListBoxModel doFillCredentialsIdItems(ItemGroup<?> context) {
+		if (context == null) {
+			context = Jenkins.get();
 		}
-		return new ListBoxModel();
+
+		// Check if the user is authenticated and not anonymous
+		if (ACL.SYSTEM.equals(Jenkins.getAuthentication()) || ACL.ANONYMOUS.equals(Jenkins.getAuthentication())) {
+			return new ListBoxModel();  // Return empty if user is system or anonymous
+		}
+
+		// If the user neither has ADMINISTER nor READ permission, return an empty ListBox
+		if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER) && !Jenkins.get().hasPermission(Item.READ)) {
+			return new ListBoxModel(); 
+		}
+
+		// For both Admins and users with READ permission, show all credentials
+		return new StandardListBoxModel()
+			.withEmptySelection()
+			.withMatching(
+				CredentialsMatchers.always(),
+				MagicPlugCredentialsImpl.all(context)
+			);
 	}
-
-
 
 	public ListBoxModel doFillPlatformNameItems() {
 		Map<String, String> supportedPlatforms = AppAutomationCapabilityService.getPlatformNames();
