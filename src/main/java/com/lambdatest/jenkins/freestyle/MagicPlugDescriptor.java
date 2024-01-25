@@ -150,11 +150,6 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			return new ListBoxModel();  // Return empty if user is system or anonymous
 		}
 
-		// If the user neither has ADMINISTER nor READ permission, return an empty ListBox
-		if (!Jenkins.get().hasPermission(Jenkins.ADMINISTER) && !Jenkins.get().hasPermission(Item.READ)) {
-			return new ListBoxModel(); 
-		}
-
 		// For both Admins and users with READ permission, show all credentials
 		return new StandardListBoxModel()
 			.withEmptySelection()
