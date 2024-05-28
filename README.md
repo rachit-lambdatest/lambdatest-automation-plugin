@@ -6,12 +6,13 @@ LambdaTest Selenium Automation Grid enables you to perform end-to-end automation
 
 
 ## Features
-Feature of the LambdaTest Automation Jenkins Plugin:
+Features of the LambdaTest Automation Jenkins Plugin:
 
 - Integrate your Jenkins Jobs to run tests on LambdaTest by configuring LambdaTest credentials using the LambdaTest Automation Jenkins Plugin.
 - Integrate your freestyle jobs as well as pipeline jobs with LambdaTest using this plugin.
 - Set up LambdaTest Tunnel using the LambdaTest Automation Plugin to test your locally hosted web applications or websites.
 - View LambdaTest test results on the go after every Jenkins Job run.
+
 ## Prerequisites
 - Minimum Jenkins version supported is 1.653+.
 - A LambdaTest Account, [Sign up now for free](https://accounts.lambdatest.com/register?_gl=1*1okw8h1*_up*MQ..*_gcl_aw*R0NMLjE3MTY4OTE0NTQuRUFJYUlRb2JDaE1JOU9fMWhvLXdoZ01WVjZsbUFoM2x3QU9GRUFBWUFTQUFFZ0pRVVBEX0J3RQ..*_gcl_au*MTkyMjI5MzY5NC4xNzE2ODkxNDU0&gclid=EAIaIQobChMI9O_1ho-whgMVV6lmAh3lwAOFEAAYASAAEgJQUPD_BwE) if you don't have an existing account on LambdaTest.
