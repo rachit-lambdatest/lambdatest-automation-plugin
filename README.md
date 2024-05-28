@@ -1,4 +1,4 @@
-<img height="100" alt="lt_logo" src="./docs/images/lt_logo.svg">
+<img alt="lt_logo" src="./docs/images/lt_logo.svg">
 
 Overview
 
