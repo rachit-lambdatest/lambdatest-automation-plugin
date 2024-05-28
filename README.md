@@ -1,64 +1,22 @@
-# Lambdatest Jenkins Plugin
-[![Build Status](https://security-jenkins.lambdatest.io/buildStatus/icon?job=HealthCheck)](https://security-jenkins.lambdatest.io/job/HealthCheck/)
-#### This Plugin is used to run automated selenium tests on LambdaTest Cloud.
+<img alt="lt_logo" src="./docs/images/lt_logo_color.svg">
 
-### Base Configuration
-https://github.com/jenkinsci/gradle-jpi-plugin
+## Overview
 
-### Installation
+LambdaTest Selenium Automation Grid enables you to perform end-to-end automation tests on a secure, reliable, and scalable Selenium infrastructure. You can perform automated cross browser testing with Selenium scripts on 3000+ browsers and operating systems environments, giving you higher test coverage and at significantly less built times. LambdaTest will help you evaluate how well your web application renders when accessed through a variety of different browsers.
 
-##### via the interface
-1. Go to your installation's management screen.
-2. Click **Manage Plugins**.
-3. Click the **Available** tab.
-4. Find the **LambdaTest Automation Plugin** and select the checkbox.
-5. then click either **Install without restart** or **Download now and install after restart**.
 
-### Building the plugin for testing/development
+## Features
+Features of the LambdaTest Automation Jenkins Plugin:
 
-<pre>gradle clean</pre>
+- Integrate your Jenkins Jobs to run tests on LambdaTest by configuring LambdaTest credentials using the LambdaTest Automation Jenkins Plugin.
+- Integrate your freestyle jobs as well as pipeline jobs with LambdaTest using this plugin.
+- Set up LambdaTest Tunnel using the LambdaTest Automation Plugin to test your locally hosted web applications or websites.
+- View LambdaTest test results on the go after every Jenkins Job run.
 
-###### This command will run the gradle Task :build
-<pre>gradle build</pre>
-or
-<pre>./gradlew build</pre>
+## Prerequisites
+- Minimum Jenkins version supported is 1.653+.
+- A LambdaTest Account, [Sign up now for free](https://accounts.lambdatest.com/register?_gl=1*1okw8h1*_up*MQ..*_gcl_aw*R0NMLjE3MTY4OTE0NTQuRUFJYUlRb2JDaE1JOU9fMWhvLXdoZ01WVjZsbUFoM2x3QU9GRUFBWUFTQUFFZ0pRVVBEX0J3RQ..*_gcl_au*MTkyMjI5MzY5NC4xNzE2ODkxNDU0&gclid=EAIaIQobChMI9O_1ho-whgMVV6lmAh3lwAOFEAAYASAAEgJQUPD_BwE) if you don't have an existing account on LambdaTest.
 
-###### This command will run the gradle Task :server
-<pre>gradle server</pre>
+## Installation and Setup:
 
-###### Build the Jenkins plugin file (will currently end in ".hpi".)
-```bash
-$ gradle jpi
-```
-
-###### This command will run the gradle JVM with specified httpPort.
-<pre>gradle server -Djenkins.httpPort=8082</pre>
-
-## Release Instructions
-
-For new `releases`, bump `version` field in `build.gradle`, then execute the following command
-
-```bash
-$ gradle release -Prelease.useAutomaticVersion=true
-```
-
-**Note : Required Java 8 version** 
-```bash
-$ export JAVA_HOME=`/usr/libexec/java_home -v 1.8`
-```
-
-**Required Gradle version 4.7**
-```bash
-$ ./gradlew wrapper --gradle-version 4.7
-```
-## Manual install
-
-1. Open Jenkins in a browser; e.g. http://jenkins_host:8080
-2. Browse to 'Manage Jenkins' --> 'Manage Plugins’ and select the **Advanced** tab.
-3. Click the **Browse** button in the 'Upload Plugin' section. 
-4. Find the location of the 'lambdatest-automation.hpi' file and click the **Open** button. 
-5. Click the **Download now and install after restart** button (this might be different on the newer version). 
-
-## License
-
-This program is free software and is distributed under an [MPL-2.0 License](LICENSE).
+- Follow this [LambdaTest Automation Jenkins Plugin Documentation](https://www.lambdatest.com/support/docs/jenkins-with-lambdatest/) to integrate your jenkins freestyle and pipeline job with LambdaTest.
