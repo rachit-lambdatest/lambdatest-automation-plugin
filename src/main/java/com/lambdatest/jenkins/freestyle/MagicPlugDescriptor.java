@@ -85,6 +85,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			return items;
 		}
 		logger.info("operatingSystem : +" + operatingSystem);
+		items.add(Constant.DEFAULT_BROWSER_NAME_VALUE, Constant.EMPTY);
 		Set<String> supportedBrowsers = CapabilityService.getBrowserNames(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
@@ -98,13 +99,11 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			@QueryParameter String browserName) {
 		ListBoxModel items = new ListBoxModel();
 		logger.info(operatingSystem + "::" + browserName);
-		if (!StringUtils.isBlank(operatingSystem) && StringUtils.isBlank(browserName)) {
-			browserName = "Chrome";
-			logger.info("Chrome added");
-		} else if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
+		 if (StringUtils.isBlank(operatingSystem) || StringUtils.isBlank(browserName)) {
 			items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 			return items;
 		}
+		items.add(Constant.DEFAULT_BROWSER_VERSION_VALUE, Constant.EMPTY);
 		Set<String> supportedBrowserVersions = CapabilityService.getBrowserVersions(operatingSystem, browserName);
 		if (!CollectionUtils.isEmpty(supportedBrowserVersions)) {
 			supportedBrowserVersions.forEach(ver -> {
@@ -121,6 +120,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			return items;
 		}
 		logger.info("operatingSystem : " + operatingSystem);
+		items.add(Constant.DEFAULT_RESOLUTION_VALUE, Constant.EMPTY);
 		List<String> supportedBrowsers = CapabilityService.getResolutions(operatingSystem);
 		if (!CollectionUtils.isEmpty(supportedBrowsers)) {
 			supportedBrowsers.forEach(br -> {
@@ -179,6 +179,7 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 		logger.info("platformName : " + platformName);
 		Set<String> supportedBrands = AppAutomationCapabilityService.getBrandNames(platformName);
 		logger.info("Brand Names triggered : " + supportedBrands);
+		items.add(Constant.DEFAULT_BRAND_NAME_VALUE, Constant.EMPTY);
 		if (!CollectionUtils.isEmpty(supportedBrands)) {
 			supportedBrands.forEach(br -> {
 				items.add(br, br);
@@ -190,16 +191,14 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 	public ListBoxModel doFillDeviceNameItems(@QueryParameter String platformName, @QueryParameter String brandName) {
 		ListBoxModel items = new ListBoxModel();
 		logger.info(platformName + "::" + brandName);
-		if (!StringUtils.isBlank(platformName) && StringUtils.isBlank(brandName)) {
-			brandName = "Asus";
-			logger.info("Asus added");
-		} else if (StringUtils.isBlank(platformName) || StringUtils.isBlank(brandName)) {
+		if (StringUtils.isBlank(platformName) || StringUtils.isBlank(brandName)) {
 			items.add(Constant.DEFAULT_DEVICE_NAME_VALUE, Constant.EMPTY);
 			return items;
 		}
 		logger.info("platformName : " + platformName + "\n" + "brandName : " + brandName);
 		Set<String> supportedDevices = AppAutomationCapabilityService.getDeviceNames(platformName, brandName);
 		logger.info("Device Names triggered : " + supportedDevices);
+		items.add(Constant.DEFAULT_DEVICE_NAME_VALUE, Constant.EMPTY);
 		if (!CollectionUtils.isEmpty(supportedDevices)) {
 			supportedDevices.forEach(br -> {
 				items.add(br, br);
@@ -212,15 +211,13 @@ public class MagicPlugDescriptor extends BuildWrapperDescriptor {
 			@QueryParameter String deviceName) {
 		ListBoxModel items = new ListBoxModel();
 		logger.info(platformName + "::" + deviceName);
-		if (!StringUtils.isBlank(platformName) && StringUtils.isBlank(deviceName)) {
-			deviceName = "Zenfone 6";
-			logger.info("Zenfone 6 added");
-		} else if (StringUtils.isBlank(platformName) || StringUtils.isBlank(deviceName)) {
+		if (StringUtils.isBlank(platformName) || StringUtils.isBlank(deviceName)) {
 			items.add(Constant.DEFAULT_DEVICE_VERSION_VALUE, Constant.EMPTY);
 			return items;
 		}
 		Set<String> supportedDeviceVersions = AppAutomationCapabilityService.getDeviceVersions(platformName, deviceName);
 		logger.info("Device Versions triggered : " + supportedDeviceVersions);
+		items.add(Constant.DEFAULT_DEVICE_VERSION_VALUE, Constant.EMPTY);
 		if (!CollectionUtils.isEmpty(supportedDeviceVersions)) {
 			supportedDeviceVersions.forEach(ver -> {
 				items.add(ver, ver);
