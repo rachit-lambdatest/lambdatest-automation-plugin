@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.collections.MapUtils;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -70,7 +71,7 @@ public class AppAutomationCapabilityService {
 			String jsonResponse = CapabilityService.sendGetRequest(deviceApiURL);
 			ObjectMapper objectMapper = new ObjectMapper();
 			objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JSONObject jsonObj = new JSONObject(jsonResponse);
+            JSONObject jsonObj = parseDeviceUrlApiResponse(new JSONObject(jsonResponse));
             String jsonResponseOs = jsonObj.getJSONArray(platformName).toString();
 			List<Devices> devices = objectMapper.readValue(jsonResponseOs, new TypeReference<List<Devices>>() {});
 			parseSupportedBrandsAndDevices(devices, platformName);
@@ -80,6 +81,48 @@ public class AppAutomationCapabilityService {
 		return supportedBrands;
 	}
 
+	// Used to parse api response from device url into supported format
+	public static JSONObject parseDeviceUrlApiResponse(JSONObject input) {
+        JSONObject output = new JSONObject();
+        for (String platform : input.keySet()) {
+            JSONArray platformArray = new JSONArray();
+            output.put(platform, platformArray);
+
+            JSONObject brands = input.getJSONObject(platform).getJSONObject("brands");
+            for (String brand : brands.keySet()) {
+				// Skip if brand is null or empty
+				if (brand == null || brand.isEmpty()) {
+                    continue;
+                }
+                JSONArray devices = brands.getJSONArray(brand);
+                JSONObject brandObj = new JSONObject();
+                brandObj.put("brand", brand);
+                JSONArray devicesArray = new JSONArray();
+
+                for (int i = 0; i < devices.length(); i++) {
+                    JSONObject device = devices.getJSONObject(i);
+                    String deviceName = device.getString("name");
+                    JSONArray osVersions = device.getJSONArray("osVersion");
+					JSONObject deviceObj = new JSONObject();
+					JSONArray deviceVersions =  new JSONArray();
+					deviceObj.put("deviceName", deviceName);
+					deviceObj.put("deviceType", "real");
+                    for (int j = 0; j < osVersions.length(); j++) {
+						JSONObject version = new JSONObject();
+						version.put("version", osVersions.getString(j));
+                        deviceVersions.put(version);
+                    }
+					deviceObj.put("osVersion", deviceVersions);
+					devicesArray.put(deviceObj);
+                }
+                brandObj.put("devices", devicesArray);
+                platformArray.put(brandObj);
+            }
+        }
+        return output;
+    }
+
+	
     private static Set<String> parseSupportedBrandsAndDevices(List<Devices> devices, String platformName) {
 		if (!CollectionUtils.isEmpty(devices)) {
 			devices.forEach(devs -> {
