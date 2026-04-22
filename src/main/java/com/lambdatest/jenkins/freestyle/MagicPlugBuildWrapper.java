@@ -32,7 +32,15 @@ import com.lambdatest.jenkins.freestyle.data.LocalTunnel;
 import com.lambdatest.jenkins.freestyle.service.LambdaTunnelService;
 import com.lambdatest.jenkins.freestyle.service.LambdaWebSocketTunnelService;
 import com.lambdatest.jenkins.freestyle.service.OSValidator;
+import com.lambdatest.jenkins.freestyle.service.TunnelStartResult;
 import com.lambdatest.jenkins.freestyle.report.ReportBuildAction;
+
+import java.net.InetAddress;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
 import hudson.FilePath;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
@@ -60,6 +68,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 	private boolean websocketTunnel;
 	private String tunnelExtCommand;
 	private Process tunnelProcess;
+	private int tunnelInfoAPIPort = -1;
 	private UserAuthResponse userAuthResponse;
 	private boolean appAutomation;
 	
@@ -118,10 +127,18 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			this.localTunnel.setTunnelName(Constant.DEFAULT_TUNNEL_NAME);
 		}
 		String tunnelNameExt = getTunnelIdentifierExtended(localTunnel.getTunnelName(), buildname, buildnumber);
+		TunnelStartResult result;
 		if(localTunnel.isWebsocketTunnel()) {
-			this.tunnelProcess = LambdaWebSocketTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
-		}else {
-			this.tunnelProcess = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+			result = LambdaWebSocketTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+		} else {
+			result = LambdaTunnelService.setUp(this.username, this.accessToken.getPlainText(),localTunnel,buildnumber, tunnelNameExt,workspacePath);
+		}
+		if (result != null) {
+			this.tunnelProcess = result.getProcess();
+			this.tunnelInfoAPIPort = result.getInfoAPIPort();
+		} else {
+			this.tunnelProcess = null;
+			this.tunnelInfoAPIPort = -1;
 		}
 	}
 
@@ -180,6 +197,39 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
 		}
 		return new MagicPlugEnvironment(build);
+	}
+
+	private boolean stopTunnelViaInfoAPI() {
+		if (tunnelInfoAPIPort <= 0 || tunnelProcess == null || !tunnelProcess.isAlive()) {
+			return false;
+		}
+		String loopback = InetAddress.getLoopbackAddress().getHostAddress();
+		String url = "http://" + loopback + ":" + tunnelInfoAPIPort + "/api/v1.0/stop";
+		RequestConfig requestConfig = RequestConfig.custom()
+				.setConnectTimeout(3000)
+				.setConnectionRequestTimeout(3000)
+				.setSocketTimeout(3000)
+				.build();
+		HttpClientBuilder builder = HttpClients.custom()
+				.disableAutomaticRetries()
+				.setDefaultRequestConfig(requestConfig);
+		HttpDelete request = new HttpDelete(url);
+		try (CloseableHttpClient client = builder.build()) {
+			int status = client.execute(request).getStatusLine().getStatusCode();
+			logger.info("Tunnel info API stop responded with HTTP " + status);
+			if (status != 200) return false;
+			long deadline = System.currentTimeMillis() + 5000;
+			while (tunnelProcess.isAlive() && System.currentTimeMillis() < deadline) {
+				Thread.sleep(200);
+			}
+			return !tunnelProcess.isAlive();
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return false;
+		} catch (Exception e) {
+			logger.warning("Info API stop failed, will fall back: " + e.getMessage());
+			return false;
+		}
 	}
 
 	public static void createFreeStyleBuildActions(AbstractBuild build, String buildname, String buildnumber,
@@ -303,13 +353,13 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 		@Override
 		public boolean tearDown(AbstractBuild build, BuildListener listener) throws IOException, InterruptedException {
-			/*
-			 * Runs after the build
-			 */
 			String buildnumber = String.valueOf(build.getNumber());
-		
 			try {
 				logger.info("tearDown");
+				if (stopTunnelViaInfoAPI()) {
+					logger.info("Tunnel stopped gracefully via info API.");
+					return super.tearDown(build, listener);
+				}
 				int result = stopTunnel(buildnumber, build.getWorkspace());
 				if (result<0 && tunnelProcess != null && tunnelProcess.isAlive()){
 					logger.info("Tunnel is still active, forcefully tearing down the tunnel process.");
@@ -323,7 +373,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 				}
 			}
 			return super.tearDown(build, listener);
-		}	
+		}
 	
 		private int stopTunnel(String buildnumber, FilePath workspacePath) throws IOException, InterruptedException {
 			if (tunnelProcess != null && tunnelProcess.isAlive()) {

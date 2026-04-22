@@ -33,7 +33,7 @@ public class LambdaWebSocketTunnelService {
 	protected static Process tunnelProcess;
 	private static String tunnelFolderName = "/";
 
-	public static Process setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
+	public static TunnelStartResult setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
 								FilePath workspacePath) {
 		logger.info("LambdaWebSocketTunnelService.setup process --start");
 		if (OSValidator.isUnix()) {
@@ -327,7 +327,7 @@ public class LambdaWebSocketTunnelService {
 		}
 	}
 
-	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key,
+	public static TunnelStartResult runCommandLine(String filePath, String tunnelLogPath, String user, String key,
 										 String tunnelName, LocalTunnel localTunnel,String ...args) throws IOException {
 		try {
 			//Updating permissions
@@ -367,7 +367,7 @@ public class LambdaWebSocketTunnelService {
 			commandLineThread.setDaemon(true);
 			commandLineThread.start();
 			logger.info("Tunnel Binary Executed");
-			return tunnelProcess;
+			return new TunnelStartResult(tunnelProcess, -1);
 		} catch (Exception e) {
 			logger.info(e.getMessage());
 			return null;
