@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.ServerSocket;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,7 +36,7 @@ public class LambdaTunnelService {
 	protected static Process tunnelProcess;
 	private static String tunnelFolderName = "/";
 
-	public static Process setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
+	public static TunnelStartResult setUp(String user, String key, LocalTunnel localTunnel, String buildnumber, String tunnelName,
 								FilePath workspacePath) {
 		if (OSValidator.isUnix()) {
 			logger.info("Jenkins configured on Unix/Linux, getting latest hash");
@@ -390,10 +392,18 @@ public class LambdaTunnelService {
 		}
 	}
 
-	public static Process runCommandLine(String filePath, String tunnelLogPath, String user, String key,
+	/** Kernel-assigned free port on the loopback interface, avoids the TOCTOU race of the shared utility. */
+	private static int allocateLoopbackPort() throws IOException {
+		try (ServerSocket ss = new ServerSocket(0, 1, InetAddress.getLoopbackAddress())) {
+			return ss.getLocalPort();
+		}
+	}
+
+	public static TunnelStartResult runCommandLine(String filePath, String tunnelLogPath, String user, String key,
 										 String tunnelName, LocalTunnel localTunnel, String tunnelPidPath, String ...args) throws IOException {
 		try {
 			int availablePort= PortAvailabilityUtils.randomFreePort();
+			int infoAPIPort = allocateLoopbackPort();
 			//Updating permissions
 			if(args.length < 1) {
 				Runtime.getRuntime().exec("chmod 777 " + filePath);
@@ -409,6 +419,9 @@ public class LambdaTunnelService {
 			}
 			if(availablePort > 0) {
 				list.add("--port");list.add(availablePort+"");
+			}
+			if(infoAPIPort > 0) {
+				list.add("--infoAPIPort");list.add(infoAPIPort+"");
 			}
 			if(localTunnel!=null && !localTunnel.getTunnelExtCommand().isEmpty()) {
 				String[] extCommands=localTunnel.getTunnelExtCommand().split(" ");
@@ -435,7 +448,7 @@ public class LambdaTunnelService {
 			commandLineThread.setDaemon(true);
 			commandLineThread.start();
 			logger.info("Tunnel Binary Executed");
-			return tunnelProcess;
+			return new TunnelStartResult(tunnelProcess, infoAPIPort);
 		} catch (Exception e) {
 			logger.info(e.getMessage());
 			return null;
