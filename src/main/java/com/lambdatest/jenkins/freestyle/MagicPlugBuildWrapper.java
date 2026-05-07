@@ -192,9 +192,9 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 		// Create Grid URL
 		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
-			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
+			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest) || this.appAutomation) {
-			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
+			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		}
 		return new MagicPlugEnvironment(build);
 	}
@@ -286,7 +286,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			env.put(Constant.LT_BRANDS, createBrandJSON(appAutomationCapabilityRequest));
 			env.put(Constant.LT_DEVICES, createDeviceJSON(appAutomationCapabilityRequest));
 			if (gridURL == null){
-				gridURL = CapabilityService.buildHubURL(username, accessToken.getEncryptedValue(),"production");
+				gridURL = CapabilityService.buildHubURL(username, accessToken.getPlainText(),"production");
 			}
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
