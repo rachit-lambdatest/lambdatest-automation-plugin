@@ -3,11 +3,13 @@ package com.lambdatest.jenkins.freestyle;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.annotation.CheckForNull;
@@ -46,6 +48,7 @@ import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
 import hudson.model.ItemGroup;
+import hudson.model.Run;
 import hudson.tasks.BuildWrapper;
 import hudson.util.Secret;
 import net.sf.json.JSONObject;
@@ -192,11 +195,30 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 
 		// Create Grid URL
 		if (!CollectionUtils.isEmpty(seleniumCapabilityRequest)) {
-			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
+			this.gridURL = CapabilityService.buildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		} else if (!CollectionUtils.isEmpty(appAutomationCapabilityRequest) || this.appAutomation) {
-			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getEncryptedValue(),"production");
+			this.gridURL = AppAutomationCapabilityService.appAutomationBuildHubURL(this.username, this.accessToken.getPlainText(),"production");
 		}
 		return new MagicPlugEnvironment(build);
+	}
+
+	@Override
+	public void makeSensitiveBuildVariables(AbstractBuild build, Set<String> sensitiveVariables) {
+		sensitiveVariables.add(Constant.LT_ACCESS_KEY);
+		sensitiveVariables.add(Constant.LT_GRID_URL);
+	}
+
+	@Override
+	public OutputStream decorateLogger(AbstractBuild build, OutputStream logger)
+			throws IOException, InterruptedException, Run.RunnerAbortedException {
+		if (this.accessToken == null) {
+			return logger;
+		}
+		String secret = this.accessToken.getPlainText();
+		if (secret == null || secret.isEmpty()) {
+			return logger;
+		}
+		return new SecretMaskingOutputStream(logger, secret);
 	}
 
 	private boolean stopTunnelViaInfoAPI() {
@@ -286,7 +308,7 @@ public class MagicPlugBuildWrapper extends BuildWrapper implements Serializable 
 			env.put(Constant.LT_BRANDS, createBrandJSON(appAutomationCapabilityRequest));
 			env.put(Constant.LT_DEVICES, createDeviceJSON(appAutomationCapabilityRequest));
 			if (gridURL == null){
-				gridURL = CapabilityService.buildHubURL(username, accessToken.getEncryptedValue(),"production");
+				gridURL = CapabilityService.buildHubURL(username, accessToken.getPlainText(),"production");
 			}
 			env.put(Constant.LT_GRID_URL, gridURL);
 			env.put(Constant.LT_BUILD_NAME, buildname);
